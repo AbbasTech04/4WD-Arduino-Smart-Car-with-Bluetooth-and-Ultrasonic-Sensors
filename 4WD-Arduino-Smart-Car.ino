@@ -1,33 +1,43 @@
-#include <Servo.h> // Import servo motor library
+#include <Servo.h>
 
-// --- Pin Definitions ---
+/*
+ * Obstacle Avoiding Robot Car
+ * ----------------------------------
+ * Hardware:
+ * - Arduino Uno
+ * - HC-SR04 Ultrasonic Sensor
+ * - SG90 Servo Motor
+ * - L298N Motor Driver
+ * - 4 DC Motors
+ *
+ * Features:
+ * - Detects obstacles using an ultrasonic sensor.
+ * - Automatically slows down when approaching an obstacle.
+ * - Reverses and scans both sides when an obstacle is too close.
+ */
 
-//Ultra Sonic sensor pins
-const int trig = 11;
-const int echo = 12;
+// Ultrasonic Sensor Pins
+const int trigPin = 11;
+const int echoPin = 12;
 
-// L298N Motor Driver pins
-const int RightForward  = 8; // input1
-const int RightBackward = 7; // input2
-const int LeftBackward  = 4; // input3
-const int LeftForward   = 2; // input4
-const int ENA = 5; // PWM pin for Right Motors speed
-const int ENB = 6; // PWM pin for Left Motors speed
+// Motor Driver Pins (L298N)
+const int RightForward  = 8; // IN1
+const int RightBackward = 7; // IN2
+const int LeftBackward  = 4; // IN3
+const int LeftForward   = 2; // IN4
 
-Servo myservo; // Create a servo object to control the radar mount
-int speed = 75; // this speed for moving forwards or backwards its normal speed on smooth surface like (tiles), If the surface rough like (carpet), then the speed should be increased to 200 or more up to 255 it depends.
-int turnSpeed = 200;
-int lowSpeed = 0; // Stop speed
-int distance = 0; // initial value will be used for UltraSonic
-char command = '\0'; // Initialize command with null character
-bool autoMode = false; // Initial state is manual mode; car remains stopped until a command is received from the smartphone
+// PWM pins for motor speed control
+const int ENA = 5; // Right motor speed
+const int ENB = 6; // Left motor speed
+
+Servo myServo;
+
+int speed = 75;     // Default reverse speed
+int distance = 0;   // Current measured distance
 
 void setup() {
 
-Serial.begin(9600); // Initialize serial communication at 9600 bps
-  pinMode(trig, OUTPUT); // transmitter that sends out a sound wave
-  pinMode(echo, INPUT); // acts as the receiver that listens for the wave to bounce back
-
+  // Configure motor control pins
   pinMode(RightForward, OUTPUT);
   pinMode(RightBackward, OUTPUT);
   pinMode(LeftForward, OUTPUT);
@@ -35,209 +45,223 @@ Serial.begin(9600); // Initialize serial communication at 9600 bps
   pinMode(ENA, OUTPUT);
   pinMode(ENB, OUTPUT);
 
-  myservo.attach(3); // Attach servo to digitalpin 3 in arduino
-  myservo.write(65); // Set servo to center position (forward)
-  delay(500); // Wait for servo to reach the center position
-  stopCar(); // Ensure the car is stopped at startup
+  // Configure ultrasonic sensor pins
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
 
+  // Attach servo motor
+  myServo.attach(3);
+
+  // Center position of the sensor
+  myServo.write(70);
+
+  // Safety delay before starting
+  delay(2000);
 }
+
 void loop() {
-  // Check if there is incoming data from the Bluetooth module
-  if (Serial.available() > 0) {
-    char incomingChar = Serial.read();    
-    if(incomingChar == 'W') {
-      autoMode = true;
-      stopCar();
-      command = '\0'; // Clear any manual command immediately when switching to Auto Mode
-    }
-    else if(incomingChar == 'M') {
-      autoMode = false;
-      stopCar();
-      command = '\0'; //Flush previous inputs to prevent immediate movement upon switching modes
-    }
-    else {
-      // Accept manual commands ONLY if Auto Mode is disabled
-      if (!autoMode) {
-        command = incomingChar;
-      }
-    }
-  }
-  // Execute the behavior based on the current mode
-  if (autoMode) {
-    handleAutoMode(); // Execute obstacle avoidance logic
-  } else {
-    if (command != '\0') {
-      handleManualMode(command); // Execute manual Bluetooth controls
-    }
-  }
-}
 
-// --- Manual Mode Management ---
-void handleManualMode(char cmd) {
-  switch (cmd) {
-    case 'F': moveForward(); break;
-    case 'B': moveBackward(); break;
-    case 'L': turnLeft(); break;
-    case 'R': turnRight(); break;
-    case 'S': stopCar(); command = '\0'; break; // Stop and clear command to prevent continuous execution
-    case 'G': forwardLeft(); break;
-    case 'I': forwardRight(); break;
-    case 'H': backwardLeft(); break;
-    case 'J': backwardRight(); break;
-  }
-}
-
-// --- Autonomous Mode Management ---
-void handleAutoMode() {
+  // Measure distance in front of the robot
   distance = getDistance();
-  // If obstacle is too close (<= 30cm) or sensor returns 0 (error/stuck)
-  if (distance == 0 || distance <= 30) {
-    stopCar();
-    delay(800); // Wait for electrical and physical stability
-    moveBackward();
-    delay(500); // Back up to give the servo and car room to maneuver
+
+  // Obstacle detected at close range
+  if (distance <= 25) {
+
     stopCar();
     delay(200);
-    // Look and measure distance to the right
+
+    // Move backward slightly to create turning space
+    moveBackward();
+    delay(400);
+
+    stopCar();
+
+    // Scan both directions
     int rightDist = lookRight();
-    delay(300);
-    // Look and measure distance to the left
+    delay(200);
+
     int leftDist = lookLeft();
-    delay(300);
-    // Decision making based on the clearest path
-    if (rightDist > leftDist && rightDist > 25) {
-        turnRight();
-        delay(400); // Time required to perform the turn
+    delay(200);
+
+    // Turn toward the side with more available space
+    if (rightDist >= leftDist) {
+
+      turnRight();
+      delay(522);
+
+    } else {
+
+      turnLeft();
+      delay(522);
     }
-    else if (leftDist > rightDist && leftDist > 25) {
-        turnLeft();
-        delay(400);
-    }
-    else {
-        // Emergency Case: Both sides are blocked, retreat further and spin around
-        moveBackward();
-        delay(500);
-        turnRight();
-        delay(600);
-    }
+
     stopCar();
     delay(200);
   }
+
+  // Long clear path ahead -> move faster
+  else if (distance > 100) {
+
+    moveForwardFast();
+  }
+
+  // Medium distance -> move slowly
   else {
-    // Path is completely clear, safe to drive forward
+
     moveForward();
   }
 }
 
-// --- Basic Movement Functions ---
+
+// Movement Functions
+/*
+ * Move forward at low speed
+ */
 void moveForward() {
-  digitalWrite(RightForward, HIGH);
-  digitalWrite(RightBackward, LOW);
-  digitalWrite(LeftForward, HIGH);
-  digitalWrite(LeftBackward, LOW);
+
   analogWrite(ENA, speed);
   analogWrite(ENB, speed);
 
+  digitalWrite(RightForward, HIGH);
+  digitalWrite(RightBackward, LOW);
+
+  digitalWrite(LeftForward, HIGH);
+  digitalWrite(LeftBackward, LOW);
 }
+
+/*
+ * Move forward at high speed
+ */
+void moveForwardFast() {
+
+  analogWrite(ENA, 180);
+  analogWrite(ENB, 180);
+
+  digitalWrite(RightForward, HIGH);
+  digitalWrite(RightBackward, LOW);
+
+  digitalWrite(LeftForward, HIGH);
+  digitalWrite(LeftBackward, LOW);
+}
+
+/*
+ * Move backward
+ */
 void moveBackward() {
-  digitalWrite(RightForward, LOW);
-  digitalWrite(RightBackward, HIGH);
-  digitalWrite(LeftForward, LOW);
-  digitalWrite(LeftBackward, HIGH);
+
   analogWrite(ENA, speed);
   analogWrite(ENB, speed);
+
+  digitalWrite(RightForward, LOW);
+  digitalWrite(RightBackward, HIGH);
+
+  digitalWrite(LeftForward, LOW);
+  digitalWrite(LeftBackward, HIGH);
 }
+
+/*
+ * Rotate robot to the right
+ */
 void turnRight() {
+
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
+
+  // Right wheel backward
   digitalWrite(RightForward, LOW);
   digitalWrite(RightBackward, HIGH);
+
+  // Left wheel forward
   digitalWrite(LeftForward, HIGH);
   digitalWrite(LeftBackward, LOW);
-  analogWrite(ENA, turnSpeed);
-  analogWrite(ENB, turnSpeed);
 }
+
+/*
+ * Rotate robot to the left
+ */
 void turnLeft() {
+
+  analogWrite(ENA, 200);
+  analogWrite(ENB, 200);
+
+  // Right wheel forward
   digitalWrite(RightForward, HIGH);
   digitalWrite(RightBackward, LOW);
+
+  // Left wheel backward
   digitalWrite(LeftForward, LOW);
   digitalWrite(LeftBackward, HIGH);
-  analogWrite(ENA, turnSpeed);
-  analogWrite(ENB, turnSpeed);
 }
 
-// Diagonal functions allow smoother joystick handling. 
-// They process combined directions (e.g., Forward + Left) using single-character 
-// Bluetooth commands, preventing data collisions and input lag.
-
-void forwardLeft() {
-  analogWrite(ENA, 220);
-  analogWrite(ENB, lowSpeed);
-  digitalWrite(RightForward, HIGH);
-  digitalWrite(RightBackward, LOW);
-  digitalWrite(LeftForward, HIGH);
-  digitalWrite(LeftBackward, LOW);
-}
-void forwardRight() {
-  analogWrite(ENA, lowSpeed);
-  analogWrite(ENB, 220);
-  digitalWrite(RightForward, HIGH);
-  digitalWrite(RightBackward, LOW);
-  digitalWrite(LeftForward, HIGH);
-  digitalWrite(LeftBackward, LOW);
-}
-void backwardLeft() {
-  analogWrite(ENA, 220);
-  analogWrite(ENB, lowSpeed);
-  digitalWrite(RightBackward, HIGH);
-  digitalWrite(RightForward, LOW);
-  digitalWrite(LeftBackward, HIGH);
-  digitalWrite(LeftForward, LOW);
-}
-void backwardRight() {
-  analogWrite(ENA, lowSpeed);
-  analogWrite(ENB, 220);
-  digitalWrite(RightBackward, HIGH);
-  digitalWrite(RightForward, LOW);
-  digitalWrite(LeftBackward, HIGH);
-  digitalWrite(LeftForward, LOW);
-}
+/*
+ * Stop all motors
+ */
 void stopCar() {
+
   analogWrite(ENA, 0);
   analogWrite(ENB, 0);
+
   digitalWrite(RightForward, LOW);
   digitalWrite(RightBackward, LOW);
+
   digitalWrite(LeftForward, LOW);
   digitalWrite(LeftBackward, LOW);
 }
 
-// --- Sensor and Servo Functions ---
+// Sensor Functions
+/*
+ * Measure distance using HC-SR04
+ * Returns distance in centimeters.
+ * If no valid reading is received,
+ * returns 400 cm as a default value.
+ */
 int getDistance() {
-  digitalWrite(trig, LOW); // clean the pin
+
+  digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
-  digitalWrite(trig, HIGH); // send the waves
+
+  digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trig, LOW); // stop sending the waves
-  // Measure the pulse duration with a 26ms timeout to prevent software freezing
-  long duration = pulseIn(echo, HIGH, 26000);
 
-  // If timeout occurs (no reflection), assume path is clear (return 100cm)
+  digitalWrite(trigPin, LOW);
 
-  if (duration == 0) return 100;
-  int d = duration / 58; // Calculate distance in cm
-  return d;
+  long duration = pulseIn(echoPin, HIGH, 30000);
+
+  int d = duration * 0.034 / 2;
+
+  return (d <= 0) ? 400 : d;
 }
+
+/*
+ * Scan right side and return distance
+ */
 int lookRight() {
-  myservo.write(0); // the degree depends on the servo position might be different from case to case mine midpoint is 65
-  delay(600); // Allow sufficient time for the servo motor to reach 0 degrees
+
+  myServo.write(5);
+  delay(600);
+
   int d = getDistance();
-  myservo.write(65); // Return to center position
-  delay(400); // Wait for the servo to stabilize at center
+
+  // Return sensor to center
+  myServo.write(70);
+  delay(200);
+
   return d;
 }
+
+/*
+ * Scan left side and return distance
+ */
 int lookLeft() {
-  myservo.write(150);
-  delay(600); // Allow sufficient time for the servo motor to reach 150 degrees
+
+  myServo.write(150);
+  delay(600);
+
   int d = getDistance();
-  myservo.write(65); // Return to center position
-  delay(400); // Wait for the servo to stabilize at center
-  return d; 
+
+  // Return sensor to center
+  myServo.write(70);
+  delay(200);
+
+  return d;
 }
