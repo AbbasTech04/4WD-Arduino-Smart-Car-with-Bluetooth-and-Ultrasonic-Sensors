@@ -32,12 +32,14 @@ Autonomous (Auto) Mode: When you send the "W" command from your phone, the Ardui
 Download any Bluetooth RC Car app from the Play Store / App Store.
 
 Play Store:https://play.google.com/store/apps/details?id=appinventor.ai_spiridakis84.car_testV
+
 App Store:https://apps.apple.com/us/app/bluetooth-for-arduino/id1505096526
 
 
 Pair your phone with the HC-05/06 module (Default PIN is usually 1234 or 0000).
 
 **🤝 Contributing**
+
 Contributions, issues, and feature requests are welcome! Feel free to check the issues page if you want to contribute.
 
 ## 📁 Project Versions
