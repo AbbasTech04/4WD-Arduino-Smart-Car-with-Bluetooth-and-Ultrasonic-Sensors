@@ -1,4 +1,5 @@
- Features
+ ## Features
+ 
 Dual Operating Modes: Easily toggle between Manual and Autonomous modes directly from your smartphone app.
 
 1- Wireless Bluetooth Control: Drive the car remotely using a mobile app (custom RC joystick app).
@@ -7,7 +8,7 @@ Dual Operating Modes: Easily toggle between Manual and Autonomous modes directly
 
 4WD Power: Equipped with a 4-wheel-drive chassis for steady movement and better traction.
 
-Hardware Components
+** Hardware Components
 
 1- Microcontroller: Arduino Uno  or Arduino Nano
 
