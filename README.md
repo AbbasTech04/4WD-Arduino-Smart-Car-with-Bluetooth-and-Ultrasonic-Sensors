@@ -1,2 +1,38 @@
-# 4WD-Arduino-Smart-Car-with-Bluetooth-and-Ultrasonic-Sensors
-4WD Arduino Smart Car project! This is an open-source, versatile robotic car built using an Arduino microcontroller. The car features dual operating modes first a Wireless Remote Control Mode via smartphone, and second, an Autonomous Obstacle Avoidance Mode powered by an ultrasonic sensor.
+ Features
+Dual Operating Modes: Easily toggle between Manual and Autonomous modes directly from your smartphone app.
+
+1- Wireless Bluetooth Control: Drive the car remotely using a mobile app (custom RC joystick app).
+
+2- Smart Obstacle Avoidance (Auto Mode): Switch to "Auto Mode" to let the car navigate independently, scanning the environment with an ultrasonic sensor to detect and avoid collisions.
+
+4WD Power: Equipped with a 4-wheel-drive chassis for steady movement and better traction.
+
+Hardware Components
+
+1- Microcontroller: Arduino Uno  or Arduino Nano
+
+2- Chassis: 4WD Robot Car Chassis Kit + 4 DC Motors
+
+3- Motor Driver: L298N
+
+4- Wireless: HC-05 or HC-06 Bluetooth Module
+
+5- Sensor: HC-SR04 Ultrasonic Sensor + Servo Motor 180 (for scanning)
+
+6- Power: 3x Li-ion Batteries (3.7V each) + Battery Holder 3.
+
+How It Works
+Manual Mode: The car listens for Bluetooth commands sent from your smartphone (e.g., 'F' for Forward, 'B' for Backward, 'L' for Left, 'R' for Right). It should starts with  M for manual mode Or W for auto mode.
+
+Autonomous (Auto) Mode: When you send the "W" command from your phone, the Arduino hands over control to the ultrasonic sensor. The car will drive forward until an obstacle is detected within a safe threshold, then scan left/right to find the clearest path and turn automatically.
+
+Setup:
+3. Mobile App Setup
+Download any Bluetooth RC Car app from the Play Store / App Store.
+Play Store:https://play.google.com/store/apps/details?id=appinventor.ai_spiridakis84.car_testV
+App Store:https://apps.apple.com/us/app/bluetooth-for-arduino/id1505096526
+
+Pair your phone with the HC-05/06 module (Default PIN is usually 1234 or 0000).
+
+🤝 Contributing
+Contributions, issues, and feature requests are welcome! Feel free to check the issues page if you want to contribute.
