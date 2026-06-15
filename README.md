@@ -2,11 +2,9 @@
  
 Dual Operating Modes: Easily toggle between Manual and Autonomous modes directly from your smartphone app.
 
-1- Wireless Bluetooth Control: Drive the car remotely using a mobile app (custom RC joystick app).
+**1- Wireless Bluetooth Control:** Drive the car remotely using a mobile app (custom RC joystick app).
 
-2- Smart Obstacle Avoidance (Auto Mode): Switch to "Auto Mode" to let the car navigate independently, scanning the environment with an ultrasonic sensor to detect and avoid collisions.
-
-4WD Power: Equipped with a 4-wheel-drive chassis for steady movement and better traction.
+**2- Smart Obstacle Avoidance (Auto Mode):** Switch to "Auto Mode" to let the car navigate independently, scanning the environment with an ultrasonic sensor to detect and avoid collisions.
 
 **Hardware Components**
 
@@ -23,9 +21,9 @@ Dual Operating Modes: Easily toggle between Manual and Autonomous modes directly
 6- Power: 3x 18650 Li-ion Batteries (3.7V each, 2200 mAh least) + Battery Holder 3.
 
 **How It Works**
-Manual Mode: The car listens for Bluetooth commands sent from your smartphone (e.g., 'F' for Forward, 'B' for Backward, 'L' for Left, 'R' for Right). It should starts with  M for manual mode Or W for auto mode.
+1- Manual Mode: The car listens for Bluetooth commands sent from your smartphone (e.g., 'F' for Forward, 'B' for Backward, 'L' for Left, 'R' for Right). It should starts with  M for manual mode Or W for auto mode.
 
-Autonomous (Auto) Mode: When you send the "W" command from your phone, the Arduino hands over control to the ultrasonic sensor. The car will drive forward until an obstacle is detected within a safe threshold, then scan left/right to find the clearest path and turn automatically.
+2- Autonomous (Auto) Mode: When you send the "W" command from your phone, the Arduino hands over control to the ultrasonic sensor. The car will drive forward until an obstacle is detected within a safe threshold, then scan left/right to find the clearest path and turn automatically.
 
 **Setup:**
 3. Mobile App Setup
@@ -44,15 +42,15 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 
 ## 📁 Project Versions
 
- **Version 2.0 (Current - Arduino Nano)**
-Features: Dual mode (Bluetooth control + Autonomous obstacle avoidance).
+ **Version 2.0 (Current - Arduino Nano)
+Features:** Dual mode (Bluetooth control + Autonomous obstacle avoidance).
 
 Hardware: Arduino Nano, 3x 18650 Li-ion Batteries, HC-05 Bluetooth, HC-SR04 Ultrasonic Sensor + Servo Motor, L298n Motor Driver.
 
 Code: Available in the default main branch.
 
- **Version 1.0 (Legacy - Arduino Uno)**
-Features: Basic autonomous obstacle avoidance only (No Bluetooth).
+ **Version 1.0 (Legacy - Arduino Uno)
+ Features:** Basic autonomous obstacle avoidance only (No Bluetooth).
 
 Hardware: Arduino Uno, 2x Batteries, HC-SR04 Ultrasonic Sensor + Servo Motor, L298n Motor Driver.
 
