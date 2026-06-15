@@ -34,5 +34,9 @@ App Store:https://apps.apple.com/us/app/bluetooth-for-arduino/id1505096526
 
 Pair your phone with the HC-05/06 module (Default PIN is usually 1234 or 0000).
 
+## Project Media & Demonstrations
+You can view the full operation video, high-quality photos, and updated circuit diagrams for the Nano version through the link below:
+[📂 View Project Media on Google Drive](https://drive.google.com/drive/folders/1XtN9jsJOe7HPrEMpcKbjQ8P-392dxl-e?usp=drive_link)
+
 🤝 Contributing
 Contributions, issues, and feature requests are welcome! Feel free to check the issues page if you want to contribute.
